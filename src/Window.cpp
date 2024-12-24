@@ -1,0 +1,83 @@
+#include "Window.h"
+#include "glHelper.h"
+#include <GLFW/glfw3.h>
+#include <iostream>
+
+
+Window::Window(): width(800),height(600),label("Window"){}
+Window::Window(int p_width, int p_height, const char* p_label): width(p_width), height(p_height), label(p_label){
+    // Creates the GLFWwindow pointer
+    window = glfwCreateWindow(width,height,label,NULL,NULL);
+
+    // If the creation failed
+    if(window == NULL){
+        std::cout << "Failed to create " << label << "\n";
+    }else{
+        std::cout << label << " created successfuly\n";
+        // Display window
+        glfwMakeContextCurrent(window);
+
+        // Set up rendering window size
+        glViewport(0,0,width,height);
+
+        // Set resize function
+        glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);
+    }
+}
+Window::~Window(){
+    this->close();
+}
+
+// The render method to put in the main loop
+void Window::render(){
+    // Swaps colour buffer
+    glfwSwapBuffers(window);
+
+    // Check for event
+    glfwPollEvents();
+}
+
+bool Window::isClosed(){
+    return glfwWindowShouldClose(window);
+}
+
+GLFWwindow* Window::getWindow(){
+    return window;
+}
+int Window::getWidth(){
+    return width;
+}
+int Window::getHeight(){
+    return height;
+}
+const char* Window::getLabel(){
+    return label;
+}
+
+// Closes the window
+void Window::close(){
+    glfwSetWindowShouldClose(window,true);
+    std::cout << "Window " << label << " " << this << " closed\n";
+}
+
+// gets the state of a key
+// https://www.glfw.org/docs/3.3/group__input.html1
+int Window::getInput(int key){
+    return glfwGetKey(window,key);
+}
+
+// clears the screen with black
+void Window::clear(){
+    clear(0.0f,0.0f,0.0f);
+}
+
+// clears the screen with rgb colour
+void Window::clear(float r, float g, float b){
+    clear(r,g,b,1.0f);
+}
+
+// clears the screen with rgba colour
+void Window::clear(float r, float g, float b, float alpha){
+    glClearColor(r,g,b,alpha);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
