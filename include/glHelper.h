@@ -18,5 +18,7 @@ unsigned int compileShader(const char* sourceCode, GLenum shaderType);
 
 unsigned int compileShaderFromSource(const char* filename);
 
+bool createShaderProgram(unsigned int& program, const unsigned int* shaders, const unsigned int  shaderCount);
+
 
 #endif

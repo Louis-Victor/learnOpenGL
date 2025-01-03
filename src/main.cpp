@@ -35,43 +35,31 @@ int main(int argc, char** argv){
         return 1;
     }
 
-
+    // Initiate GLEW
     if (glewInit() != GLEW_OK) {
         cerr << "Failed to initialize GLEW\n";
         return 1;
     }
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
+    // array shader
+    const unsigned int numShader = 2;
+    unsigned int shaders[numShader];
 
+    // Vertex Shader 
+    shaders[0] = compileShaderFromSource("shaders/mainVertexShader.vert");
+    // Fragment Shader
+    shaders[1] = compileShaderFromSource("shaders/mainFragmentShader.frag");
 
-    /* Vertex Shader */
-    unsigned int vertexShader;
-    vertexShader = compileShaderFromSource("shaders/mainVertexShader.vert");
-
-    /* Fragment Shader */
-    unsigned int fragmentShader;
-    fragmentShader = compileShaderFromSource("shaders/mainFragmentShader.frag");
-
-    /* Shader Program */
+    //  Shader Program
     unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram,vertexShader);
-    glAttachShader(shaderProgram,fragmentShader);
-    glLinkProgram(shaderProgram);
+    if(createShaderProgram(shaderProgram,shaders,numShader)) cout << "Linking Successful\n";
+    else return 1;
 
-    // Check for errors
-    int success;
-    char infoLog[512];
-    glGetProgramiv(shaderProgram,GL_LINK_STATUS,&success);
-    if(!success){
-        glGetProgramInfoLog(shaderProgram,512,NULL,infoLog);
-        cout << "error::shader::program::linking_failed\n" << infoLog << "\n";
-        return 1;
+    // Shader objects not needed anymore
+    for(unsigned int i=0; i<numShader;i++){
+        glDeleteShader(shaders[i]);
     }
-
-    // Not needed anymore
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     /* Vertex Input */
     // A triangle

@@ -30,7 +30,7 @@ bool setUpGL(){
 }
 
 std::string importShader(const char* filename){
-    std::ifstream shaderSource(filename);
+    std::fstream shaderSource(filename);
     if(!shaderSource){
         std::cout << "Failed to open " << filename << "\n";
         exit(1);
@@ -94,4 +94,22 @@ unsigned int compileShaderFromSource(const char* filename){
     unsigned int shader = compileShader(importShader(filename).c_str(),shaderType);
 
     return shader;
+}
+
+bool createShaderProgram(unsigned int& program, const unsigned int* shaders, const unsigned int shaderCount){
+    program = glCreateProgram();
+    for(unsigned int i=0;i<shaderCount;i++){
+        glAttachShader(program,shaders[i]);
+    }
+    glLinkProgram(program);
+
+    int success;
+    char infoLog[512];
+    glGetProgramiv(program,GL_LINK_STATUS,&success);
+    if(!success){
+        glGetProgramInfoLog(program,512,NULL,infoLog);
+        std::cout << "error::shader::program::linking_failed\n" << infoLog << "\n";
+        return false;
+    }
+    return true;
 }
