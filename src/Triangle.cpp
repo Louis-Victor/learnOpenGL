@@ -53,3 +53,9 @@ void Triangle::render(){
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES,0,3);
 }
+
+Triangle::~Triangle(){
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(shaderProgram);
+}

@@ -19,6 +19,7 @@ class Triangle{
         Triangle();
         Triangle(float* m_verticves);
         void render();
+        ~Triangle();
 };
 
 
