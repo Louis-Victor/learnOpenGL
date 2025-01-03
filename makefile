@@ -27,15 +27,16 @@ LDLIBS = -lm
 
 # OPENGL flags
 OPENGL_FLAGS= \
+			  -lGLEW\
 			  -lGL\
 			  -lX11\
 			  -lpthread\
 			  -lXrandr\
 			  -lXi\
 			  -ldl\
-			  -lGLESv2\
 			  `pkg-config --static --libs glfw3`
 			  #-lglfw3
+			  #-lGLESv2\
 
 .PHONY : all clean # Makes sure no all file is built
 

@@ -1,11 +1,12 @@
 #include "glHelper.h"
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <cstring>
-#include  <GLES2/gl2.h>
-#include <EGL/egl.h>
+//#include  <GLES2/gl2.h>
+//#include <EGL/egl.h>
 
 // Window resize function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -28,7 +29,7 @@ bool setUpGL(){
     return succ;
 }
 
-const char* importShader(const char* filename){
+std::string importShader(const char* filename){
     std::ifstream shaderSource(filename);
     if(!shaderSource){
         std::cout << "Failed to open " << filename << "\n";
@@ -43,10 +44,8 @@ const char* importShader(const char* filename){
     }
     shaderSource.close();
 
-    char* rChar = new char[source.length()+1];
-    std::strcpy(rChar,source.c_str());
 
-    return rChar;
+    return source;
 }
 
 unsigned int compileShader(const char* sourceCode, GLenum shaderType){
@@ -92,7 +91,7 @@ unsigned int compileShaderFromSource(const char* filename){
         exit(1);
     }
 
-    unsigned int shader = compileShader(importShader(filename),shaderType);
+    unsigned int shader = compileShader(importShader(filename).c_str(),shaderType);
 
     return shader;
 }

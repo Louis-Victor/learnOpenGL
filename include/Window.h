@@ -1,5 +1,6 @@
 #ifndef __WINDOW__
 #define __WINDOW__
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
