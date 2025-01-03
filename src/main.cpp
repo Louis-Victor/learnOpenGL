@@ -11,6 +11,7 @@
 //#include <EGL/egl.h>
 #include "glHelper.h"
 #include "Window.h"
+#include "Triangle.h"
 
 
 using namespace std;
@@ -61,42 +62,8 @@ int main(int argc, char** argv){
         glDeleteShader(shaders[i]);
     }
 
-    /* Vertex Input */
     // A triangle
-    float vertices[] =
-    {
-        -0.5f,-0.5f,0.0f,
-         0.5f,-0.5f,0.0f,
-         0.0f, 0.5f,0.0f
-    };
-    
-    // Generates vertex array objects
-    unsigned int VAO;
-    glGenVertexArrays(1,&VAO);
-
-    // Generates vertex buffer objects
-    unsigned int VBO;
-    glGenBuffers(1,&VBO);
-
-    /* drawing the triangle */
-    // 0. copy vertices to buffer
-    // Bind VAO
-    glBindVertexArray(VAO);
-    // Bind VBO buffer to a vertex buffer (GL_ARRAY_BUFFER)
-    glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    // Copy data into buffer
-    glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
-
-    // 1. set vertex attribute pointer
-    // how to read triangle data
-    // In vertex shader source, layout. Param 1 refers to location = 0
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Draw call in render loop
-    // glUseProgram(shaderProgram);
-    // glBindVertexArray(VAO);
-    // glDrawArrays(GL_TRIANGLES,0,3);
+    Triangle triangle;
 
 
     /* Render loop */
@@ -110,9 +77,7 @@ int main(int argc, char** argv){
         mainWindow.clear(0.2f,0.3f,0.3f);
 
         // Draw the triangle
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES,0,3);
+        triangle.render();
 
         mainWindow.render();
 
