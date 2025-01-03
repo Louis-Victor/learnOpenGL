@@ -9,6 +9,7 @@ CC = g++
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
+SHDR_DIR = $(BIN_DIR)/shaders
 
 TARGET := $(BIN_DIR)/main
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
@@ -39,10 +40,11 @@ OPENGL_FLAGS= \
 .PHONY : all clean # Makes sure no all file is built
 
 # default target
-all : $(TARGET)
+all : $(TARGET) 
 	@echo Compile $(SRC)
 	@echo Build $(OBJ)
 	@echo Target $(TARGET)
+	cp -rv shaders/ $(SHDR_DIR)
 
 # Build OBJ files
 $(TARGET) : $(OBJ) | $(BIN_DIR)
@@ -56,7 +58,7 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # Creates bin/ if it doesnt exist
-$(BIN_DIR) $(OBJ_DIR):
+$(BIN_DIR) $(OBJ_DIR) $(SHDR_DIR):
 	mkdir -p $@
 
 clean : $(BIN_DIR) $(OBJ_DIR)

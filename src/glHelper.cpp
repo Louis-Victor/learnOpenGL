@@ -2,6 +2,10 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <cstring>
+#include  <GLES2/gl2.h>
+#include <EGL/egl.h>
 
 // Window resize function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -24,3 +28,71 @@ bool setUpGL(){
     return succ;
 }
 
+const char* importShader(const char* filename){
+    std::ifstream shaderSource(filename);
+    if(!shaderSource){
+        std::cout << "Failed to open " << filename << "\n";
+        exit(1);
+    }
+
+    std::string source;
+    char buffer[256];
+    while(shaderSource.getline(buffer,256)){
+        source += buffer;
+        source += "\n";
+    }
+    shaderSource.close();
+
+    char* rChar = new char[source.length()+1];
+    std::strcpy(rChar,source.c_str());
+
+    return rChar;
+}
+
+unsigned int compileShader(const char* sourceCode, GLenum shaderType){
+    unsigned int shader;
+    shader = glCreateShader(shaderType);
+    glShaderSource(shader,1,&sourceCode,NULL);
+    glCompileShader(shader);
+
+    int success;
+    char infoLog[512];
+    glGetShaderiv(shader,GL_COMPILE_STATUS,&success);
+    if(!success){
+        glGetShaderInfoLog(shader,512,NULL,infoLog);
+        std::cout << "error::shader::compilation_failed\n" << infoLog << "\n";
+
+        exit(1);
+    }
+
+    return shader;
+}
+
+/*
+ * GL_COMPUTE_SHADER -> .comp
+ * GL_VERTEX_SHADER -> .vert
+ * GL_TESS_CONTROL_SHADER -> .tesc
+ * GL_TESS_EVALUATION_SHADER -> .tese
+ * GL_GEOMETRY_SHADER -> .geom
+ * GL_FRAGMENT_SHADER -> .frag
+ */
+unsigned int compileShaderFromSource(const char* filename){
+    std::string sfl = filename;
+    sfl = sfl.substr(sfl.length()-4,4);
+
+    GLenum shaderType;
+    if(sfl == "comp") shaderType = GL_COMPUTE_SHADER;
+    else if(sfl == "vert") shaderType = GL_VERTEX_SHADER;
+    else if(sfl == "tesc") shaderType = GL_TESS_CONTROL_SHADER;
+    else if(sfl == "tese") shaderType = GL_TESS_EVALUATION_SHADER;
+    else if(sfl == "geom") shaderType = GL_GEOMETRY_SHADER;
+    else if(sfl == "frag") shaderType = GL_FRAGMENT_SHADER;
+    else{
+        std::cout << "Invalid file extensnsion, use any of the following\n\t.comp\n\t.vert\n\t.tesc\n\t.tese\n\t.geom\n\t.frag\n";
+        exit(1);
+    }
+
+    unsigned int shader = compileShader(importShader(filename),shaderType);
+
+    return shader;
+}

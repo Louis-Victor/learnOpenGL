@@ -1,0 +1,47 @@
+#include "glHelper.h"
+#include <GLFW/glfw3.h>
+#include <iostream>
+#include <string>
+#include <fstream>
+
+// Window resize function
+void framebuffer_size_callback(GLFWwindow* window, int width, int height){
+    //std::cout << "(" << width << "," << height << ")\n";
+    glViewport(0,0,width,height);
+}
+
+bool setUpGL(){
+    bool succ = glfwInit();
+
+    if(succ){
+        // Major and minor opengl versions
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
+
+        // Sets up opengl profile
+        glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+    }
+
+    return succ;
+}
+
+const char* importShader(const char* filename){
+    std::ifstream shaderSource(filename);
+    if(!shaderSource){
+        std::cout << "Failed to open " << filename << "\n";
+        exit(1);
+    }
+
+    std::string source;
+    char buffer[256];
+    while(shaderSource.getline(buffer,256)){
+        source += buffer;
+        source += "\n";
+    }
+    shaderSource.close();
+
+    char* rChar = new char[source.length()+1];
+    std::strcpy(rChar,source.1c_str());
+
+    return rChar;
+}
