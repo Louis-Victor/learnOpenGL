@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <cmath>
 
 // GLFW & GLEW include
 #include <GL/glew.h>
@@ -13,6 +14,7 @@
 #include "Window.h"
 //#include "Triangle.h"
 #include "Mesh.h"
+#include "Shader.h"
 
 
 using namespace std;
@@ -45,37 +47,59 @@ int main(int argc, char** argv){
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
     float vertices[] = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f,  // top left
-         0.0f,  0.9f, 0.0f   // middle top
+        //  x      y     z |   r     g     b     a
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f
     };
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3,   // second triangle
-        0, 3, 4    // third triangle
+    unsigned int indices[] = {
+        0, 1, 2
     };
 
-    Mesh mesh(vertices,15,indices,9);
+    const unsigned int shaderCount = 2;
+    const char* shaderList[shaderCount] = {
+        "shaders/main.vert",
+        "shaders/main.frag"
+    };
+
+    Shader shader(shaderList,shaderCount);
+    Mesh mesh(vertices,3*7,indices,1*3,shader);
+
+
+    // texture
+    float textureCoord[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.5f, 1.0f
+    };
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
 
     /* Render loop */
     // Check if window has closed
+    bool isFill = true;
+    bool spaceFlag = false;
     while(!mainWindow.isClosed()){
         if(mainWindow.getInput(GLFW_KEY_ESCAPE) == GLFW_PRESS){
             mainWindow.close();
             cout << "Closed\n";
         }
+        if(mainWindow.getInput(GLFW_KEY_SPACE) == GLFW_RELEASE && spaceFlag){
+            spaceFlag = false;
+            if(isFill) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            isFill = !isFill;
+        }
+        else if(mainWindow.getInput(GLFW_KEY_SPACE) == GLFW_PRESS) spaceFlag = true;
 
         mainWindow.clear(0.2f,0.3f,0.3f);
-
-        
-        // wireframe
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        // filled
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         mesh.render();
 

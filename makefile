@@ -10,6 +10,7 @@ SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
 SHDR_DIR = $(BIN_DIR)/shaders
+TXTR_DIR=$(BIN_DIR)/textures
 
 TARGET := $(BIN_DIR)/main
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
@@ -46,6 +47,7 @@ all : $(TARGET)
 	@echo Build $(OBJ)
 	@echo Target $(TARGET)
 	cp -rv shaders/ $(SHDR_DIR)
+	cp -rv textures $(TXTR_DIR)
 
 # Build OBJ files
 $(TARGET) : $(OBJ) | $(BIN_DIR)
@@ -59,7 +61,7 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # Creates bin/ if it doesnt exist
-$(BIN_DIR) $(OBJ_DIR) $(SHDR_DIR):
+$(BIN_DIR) $(OBJ_DIR) $(SHDR_DIR) $(TXTR_DIR):
 	mkdir -p $@
 
 clean : $(BIN_DIR) $(OBJ_DIR)
