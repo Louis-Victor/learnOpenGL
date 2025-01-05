@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include "stb_image.h"
 
 // GLFW & GLEW include
 #include <GL/glew.h>
@@ -18,6 +19,12 @@
 
 
 using namespace std;
+
+const unsigned int shaderCount = 2;
+const char* shaderList[shaderCount] = {
+    "shaders/main.vert",
+    "shaders/main.frag"
+};
 
 
 int main(int argc, char** argv){
@@ -47,32 +54,34 @@ int main(int argc, char** argv){
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
     float vertices[] = {
-        //  x      y     z |   r     g     b     a
-         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f
-    };
-    unsigned int indices[] = {
-        0, 1, 2
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f, 1.0f,   0.0f, 1.0f    // top left
     };
 
-    const unsigned int shaderCount = 2;
-    const char* shaderList[shaderCount] = {
-        "shaders/main.vert",
-        "shaders/main.frag"
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3
     };
+
 
     Shader shader(shaderList,shaderCount);
-    Mesh mesh(vertices,3*7,indices,1*3,shader);
+    Mesh mesh(vertices,4*9,indices,2*3,shader);
 
 
+    //
     // texture
-    float textureCoord[] = {
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        0.5f, 1.0f
-    };
+    //
 
+
+    // load texture
+
+    unsigned int texture1, texture2;
+    glGenTextures(1,&texture1);
+    glBindTexture(GL_TEXTURE_2D,texture1);
+    // texture parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
@@ -80,6 +89,54 @@ int main(int argc, char** argv){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("textures/container.jpg",&width,&height,&nrChannels, 0);
+    if(data){
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }else{
+        cout << "Failed to load texture\n";
+        return 1;
+    }
+    // free from memory
+    stbi_image_free(data);
+
+    glGenTextures(1,&texture2);
+    glBindTexture(GL_TEXTURE_2D,texture2);
+    // texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_set_flip_vertically_on_load(true);
+    data = stbi_load("textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }else{
+        cout << "Failed to load texture\n";
+        return 1;
+    }
+    //mesh.getShaderProgram().setInt("texture1",0);
+    //mesh.getShaderProgram().setInt("texture2",1);
+    shader.setInt("texture1",0);
+    shader.setInt("texture2",1);
+
+
+    // free from memory
+    stbi_image_free(data);
 
 
     /* Render loop */
@@ -101,6 +158,10 @@ int main(int argc, char** argv){
 
         mainWindow.clear(0.2f,0.3f,0.3f);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D,texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D,texture2);
         mesh.render();
 
         mainWindow.render();

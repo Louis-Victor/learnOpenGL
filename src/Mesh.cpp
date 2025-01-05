@@ -28,21 +28,24 @@ Mesh::Mesh(float* m_vertices, unsigned int m_numVert,unsigned int* m_indices, un
     // Copy data into buffer
     glBufferData(GL_ARRAY_BUFFER,numVert*sizeof(float),vertices,GL_STATIC_DRAW);
     // How to read position data
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,7*sizeof(float),(void*)0);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)0);
     glEnableVertexAttribArray(0);
     // How to read color data
-    glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,7*sizeof(float),(void*)(3*sizeof(float)));
+    glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
+    // How to read texture data
+    glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)(7*sizeof(float)));
+    glEnableVertexAttribArray(2);
     // Generate EBO buffer object
     glGenBuffers(1,&EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,numInd*sizeof(unsigned int),indices,GL_STATIC_DRAW);
+    shader.use();
 }
 
 
 void Mesh::render(){
     glBindVertexArray(VAO);
-    shader.use();
     glDrawElements(GL_TRIANGLES,numInd,GL_UNSIGNED_INT,0);
 
 }
