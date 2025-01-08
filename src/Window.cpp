@@ -80,5 +80,6 @@ void Window::clear(float r, float g, float b){
 // clears the screen with rgba colour
 void Window::clear(float r, float g, float b, float alpha){
     glClearColor(r,g,b,alpha);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

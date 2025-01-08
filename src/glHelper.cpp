@@ -5,8 +5,8 @@
 #include <string>
 #include <fstream>
 #include <cstring>
-//#include  <GLES2/gl2.h>
-//#include <EGL/egl.h>
+
+char* shaderDir = "shaders/";
 
 // Window resize function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -30,9 +30,11 @@ bool setUpGL(){
 }
 
 std::string importShader(const char* filename){
-    std::fstream shaderSource(filename);
+    std::string fullPath = std::string(shaderDir) + std::string(filename);
+
+    std::fstream shaderSource(fullPath.c_str());
     if(!shaderSource){
-        std::cout << "Failed to open " << filename << "\n";
+        std::cout << "Failed to open " << fullPath << "\n";
         exit(1);
     }
 

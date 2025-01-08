@@ -29,6 +29,7 @@ Shader::Shader(const char** shaderList, const unsigned int shaderCount){
 
     for(unsigned int i=0;i<shaderCount;i++){
         glDeleteShader(shaders[i]);
+        std::cout << "Shader " << shaderList[i] << " done\n";
     }
 }
 

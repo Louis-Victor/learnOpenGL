@@ -11,19 +11,28 @@
 //#include </usr/include/GLFW/glfw3.h>
 //#include <GLES2/gl2.h>
 //#include <EGL/egl.h>
+// OpenGL Mathematics
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "glHelper.h"
 #include "Window.h"
 //#include "Triangle.h"
 #include "Mesh.h"
+#include "Tmesh.h"
 #include "Shader.h"
+#include "Texture.h"
 
 
 using namespace std;
+const float screen = 1920.0f/1080.0f;
+
 
 const unsigned int shaderCount = 2;
 const char* shaderList[shaderCount] = {
-    "shaders/main.vert",
-    "shaders/main.frag"
+    "main.vert",
+    "main.frag"
 };
 
 
@@ -40,7 +49,8 @@ int main(int argc, char** argv){
     }
 
     // Create Window object
-    Window mainWindow(800,600,"mainWindow");
+    // 1920x1080
+    Window mainWindow(800*screen,800,"mainWindow");
     if(mainWindow.getWindow() == NULL){
         glfwTerminate();
         return 1;
@@ -54,89 +64,78 @@ int main(int argc, char** argv){
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
     float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,   1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f, 1.0f,   0.0f, 1.0f    // top left
-    };
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f, // 0
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
 
-    unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3
+        -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f, // 6
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f, // 12
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f, // 18
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f, // 24
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f, // 30
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f
     };
 
 
     Shader shader(shaderList,shaderCount);
-    Mesh mesh(vertices,4*9,indices,2*3,shader);
-
-
-    //
-    // texture
-    //
-
+    Tmesh mesh(vertices,36,shader,4,2);
 
     // load texture
+    Texture texture1("container.jpg","texture1",false,false,0,GL_CLAMP_TO_EDGE);
+    Texture texture2("awesomeface.png","texture2",true,true,1);
 
-    unsigned int texture1, texture2;
-    glGenTextures(1,&texture1);
-    glBindTexture(GL_TEXTURE_2D,texture1);
-    // texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    texture1.setShaderId(shader);
+    texture2.setShaderId(shader);
 
+    // matrix transformations
+    // to world coord
+    glm::mat4 model = glm::mat4(1.0f);
+    //model = glm::rotate(model, glm::radians(-55.0f), 
+    //        glm::vec3(1.0,0.0,0.0));
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // view matrix
+    glm::mat4 view = glm::mat4(1.0f);
+    // note that we're translating the scene in the reverse direction of where we want to move
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // projection matrix
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f),screen, 0.1f, 100.0f);
 
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load("textures/container.jpg",&width,&height,&nrChannels, 0);
-    if(data){
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }else{
-        cout << "Failed to load texture\n";
-        return 1;
-    }
-    // free from memory
-    stbi_image_free(data);
-
-    glGenTextures(1,&texture2);
-    glBindTexture(GL_TEXTURE_2D,texture2);
-    // texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("textures/awesomeface.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }else{
-        cout << "Failed to load texture\n";
-        return 1;
-    }
-    //mesh.getShaderProgram().setInt("texture1",0);
-    //mesh.getShaderProgram().setInt("texture2",1);
-    shader.setInt("texture1",0);
-    shader.setInt("texture2",1);
-
-
-    // free from memory
-    stbi_image_free(data);
+    unsigned int modelLoc = glGetUniformLocation(shader.get(),"model");
+    unsigned int viewLoc = glGetUniformLocation(shader.get(),"view");
+    unsigned int projectionLoc = glGetUniformLocation(shader.get(),"projection");
 
 
     /* Render loop */
@@ -155,13 +154,27 @@ int main(int argc, char** argv){
             isFill = !isFill;
         }
         else if(mainWindow.getInput(GLFW_KEY_SPACE) == GLFW_PRESS) spaceFlag = true;
+        if(mainWindow.getInput(GLFW_KEY_UP) == GLFW_PRESS){
+            view = glm::translate(view,glm::vec3(0.0f,0.0f,0.1f));
+        }else if(mainWindow.getInput(GLFW_KEY_DOWN) == GLFW_PRESS){
+            view = glm::translate(view,glm::vec3(0.0f,0.0f,-0.1f));
+        }
+        if(mainWindow.getInput(GLFW_KEY_RIGHT) == GLFW_PRESS){
+            view = glm::translate(view,glm::vec3(-0.1f,0.0f,0.0f));
+        }else if(mainWindow.getInput(GLFW_KEY_LEFT) == GLFW_PRESS){
+            view = glm::translate(view,glm::vec3(0.1f,0.0f,0.0f));
+        }
 
         mainWindow.clear(0.2f,0.3f,0.3f);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D,texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D,texture2);
+        model = glm::mat4(1.0f);
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
+        glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(model));
+        glUniformMatrix4fv(viewLoc,1,GL_FALSE,glm::value_ptr(view));
+        glUniformMatrix4fv(projectionLoc,1,GL_FALSE,glm::value_ptr(projection));
+
+        texture1.use();
+        texture2.use();
         mesh.render();
 
         mainWindow.render();

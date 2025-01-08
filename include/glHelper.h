@@ -6,6 +6,7 @@
 //#include <GLES2/gl2.h>
 //#include <EGL/egl.h>
 
+
 // Window resize function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 

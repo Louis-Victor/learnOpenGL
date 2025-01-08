@@ -10,7 +10,8 @@ SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
 SHDR_DIR = $(BIN_DIR)/shaders
-TXTR_DIR=$(BIN_DIR)/textures
+RES_DIR = $(BIN_DIR)/resources
+TXTR_DIR=$(RES_DIR)/textures
 
 TARGET := $(BIN_DIR)/main
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
@@ -42,12 +43,12 @@ OPENGL_FLAGS= \
 .PHONY : all clean # Makes sure no all file is built
 
 # default target
-all : $(TARGET) 
+all : $(TARGET) $(SHDR_DIR) $(TXTR_DIR)
 	@echo Compile $(SRC)
 	@echo Build $(OBJ)
 	@echo Target $(TARGET)
-	cp -rv shaders/ $(SHDR_DIR)
-	cp -rv textures $(TXTR_DIR)
+	cp -rv shaders/* $(SHDR_DIR)
+	cp -rv resources/textures/* $(TXTR_DIR)
 
 # Build OBJ files
 $(TARGET) : $(OBJ) | $(BIN_DIR)
