@@ -6,6 +6,9 @@
 //#include <GLES2/gl2.h>
 //#include <EGL/egl.h>
 
+extern float xoffset;
+extern float yoffset;
+
 
 // Window resize function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -21,5 +24,6 @@ unsigned int compileShaderFromSource(const char* filename);
 
 bool createShaderProgram(unsigned int& program, const unsigned int* shaders, const unsigned int  shaderCount);
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 #endif

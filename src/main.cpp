@@ -23,6 +23,7 @@
 #include "Tmesh.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Camera.h"
 
 
 using namespace std;
@@ -125,9 +126,7 @@ int main(int argc, char** argv){
     //        glm::vec3(1.0,0.0,0.0));
 
     // view matrix
-    glm::mat4 view = glm::mat4(1.0f);
-    // note that we're translating the scene in the reverse direction of where we want to move
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    Camera camera;
 
     // projection matrix
     glm::mat4 projection;
@@ -137,12 +136,25 @@ int main(int argc, char** argv){
     unsigned int viewLoc = glGetUniformLocation(shader.get(),"view");
     unsigned int projectionLoc = glGetUniformLocation(shader.get(),"projection");
 
+    // deltaTime
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+
+    float xlastOff = xoffset;
+    float ylastOff = yoffset;
 
     /* Render loop */
-    // Check if window has closed
     bool isFill = true;
     bool spaceFlag = false;
+    // Check if window has closed
     while(!mainWindow.isClosed()){
+        // calculate deltaTime
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+
+        // input processing
         if(mainWindow.getInput(GLFW_KEY_ESCAPE) == GLFW_PRESS){
             mainWindow.close();
             cout << "Closed\n";
@@ -154,21 +166,36 @@ int main(int argc, char** argv){
             isFill = !isFill;
         }
         else if(mainWindow.getInput(GLFW_KEY_SPACE) == GLFW_PRESS) spaceFlag = true;
-        if(mainWindow.getInput(GLFW_KEY_UP) == GLFW_PRESS){
-            view = glm::translate(view,glm::vec3(0.0f,0.0f,0.1f));
-        }else if(mainWindow.getInput(GLFW_KEY_DOWN) == GLFW_PRESS){
-            view = glm::translate(view,glm::vec3(0.0f,0.0f,-0.1f));
+
+        // camera movement wasd
+        if(mainWindow.getInput(GLFW_KEY_W) == GLFW_PRESS){
+            camera.processKeyboard(FORWARD,deltaTime);
         }
-        if(mainWindow.getInput(GLFW_KEY_RIGHT) == GLFW_PRESS){
-            view = glm::translate(view,glm::vec3(-0.1f,0.0f,0.0f));
-        }else if(mainWindow.getInput(GLFW_KEY_LEFT) == GLFW_PRESS){
-            view = glm::translate(view,glm::vec3(0.1f,0.0f,0.0f));
+        if(mainWindow.getInput(GLFW_KEY_S) == GLFW_PRESS){
+            camera.processKeyboard(BACKWARD,deltaTime);
         }
+        if(mainWindow.getInput(GLFW_KEY_D) == GLFW_PRESS){
+            camera.processKeyboard(RIGHT,deltaTime);
+        }
+        if(mainWindow.getInput(GLFW_KEY_A) == GLFW_PRESS){
+            camera.processKeyboard(LEFT,deltaTime);
+        }
+
+        // camera rotation
+        std::cout << "PRE " << xoffset << " " << yoffset << "\n";
+        camera.processMouseMovement(xoffset,yoffset);
+        //xoffset  = 0.0f;
+        //yoffset = 0.0f;
+        if(xoffset == xlastOff) xoffset = 0;
+        if(yoffset == ylastOff) yoffset = 0;
+        xlastOff  = xoffset;
+        ylastOff  = yoffset;
 
         mainWindow.clear(0.2f,0.3f,0.3f);
 
-        model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
+        //model = glm::mat4(1.0f);
+        //model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
+        glm::mat4 view = camera.getViewMatrix();
         glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(model));
         glUniformMatrix4fv(viewLoc,1,GL_FALSE,glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc,1,GL_FALSE,glm::value_ptr(projection));

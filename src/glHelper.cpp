@@ -8,6 +8,16 @@
 
 char* shaderDir = "shaders/";
 
+float xoffset = 0.0f;
+float yoffset = 0.0f;
+
+// mouse positions
+double lastX = 960.0f;
+double lastY = 540.0f;
+
+// first camera movement
+bool firstMove = true;
+
 // Window resize function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     //std::cout << "(" << width << "," << height << ")\n";
@@ -115,3 +125,22 @@ bool createShaderProgram(unsigned int& program, const unsigned int* shaders, con
     }
     return true;
 }
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+    if(firstMove){
+        lastX = xpos;
+        lastY = ypos;
+
+        firstMove = false;
+    }
+    std::cout  << "x: " << xpos << " " << lastX << "\n";
+    std::cout  << "y: " << ypos << " " << lastY << "\n";
+    xoffset = xpos - lastX;
+    yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    if (abs(xoffset) < 0.001f) xoffset = 0;
+    if (abs(yoffset) < 0.001f) yoffset = 0;
+}
+

@@ -23,7 +23,11 @@ Window::Window(int p_width, int p_height, const char* p_label): width(p_width), 
 
         // Set resize function
         glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);
+
+        //  Set cursor callback
+        glfwSetCursorPosCallback(window, mouse_callback);
     }
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
 }
 Window::~Window(){
     this->close();
